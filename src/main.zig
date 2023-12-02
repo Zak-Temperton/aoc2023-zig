@@ -1,6 +1,6 @@
 const std = @import("std");
 const day01 = @import("day01.zig");
-//const day02 = @import("day02.zig");
+const day02 = @import("day02.zig");
 //const day03 = @import("day03.zig");
 //const day04 = @import("day04.zig");
 //const day05 = @import("day05.zig");
@@ -100,56 +100,56 @@ pub fn main() !void {
         if (days.get(day)) |day_enum| {
             switch (day_enum) {
                 .day01 => try day01.run(allocator, stdout),
-                //                .day02 => try day02.run(alloc, stdout),
-                //                .day03 => try day03.run(alloc, stdout),
-                //                .day04 => try day04.run(alloc, stdout),
-                //                .day05 => try day05.run(alloc, stdout),
-                //                .day06 => try day06.run(alloc, stdout),
-                //                .day07 => try day07.run(alloc, stdout),
-                //                .day08 => try day08.run(alloc, stdout),
-                //                .day09 => try day09.run(alloc, stdout),
-                //                .day10 => try day10.run(alloc, stdout),
-                //                .day11 => try day11.run(alloc, stdout),
-                //                .day12 => try day12.run(alloc, stdout),
-                //                .day13 => try day13.run(alloc, stdout),
-                //                .day14 => try day14.run(alloc, stdout),
-                //                .day15 => try day15.run(alloc, stdout),
-                //                .day16 => try day16.run(alloc, stdout),
-                //                .day17 => try day17.run(alloc, stdout),
-                //                .day18 => try day18.run(alloc, stdout),
-                //                .day19 => try day19.run(alloc, stdout),
-                //                .day20 => try day20.run(alloc, stdout),
-                //                .day21 => try day21.run(alloc, stdout),
-                //                .day22 => try day22.run(alloc, stdout),
-                //                .day23 => try day23.run(alloc, stdout),
-                //                .day24 => try day24.run(alloc, stdout),
-                //                .day25 => try day25.run(alloc, stdout),
+                .day02 => try day02.run(allocator, stdout),
+                //                .day03 => try day03.run(allocator, stdout),
+                //                .day04 => try day04.run(allocator, stdout),
+                //                .day05 => try day05.run(allocator, stdout),
+                //                .day06 => try day06.run(allocator, stdout),
+                //                .day07 => try day07.run(allocator, stdout),
+                //                .day08 => try day08.run(allocator, stdout),
+                //                .day09 => try day09.run(allocator, stdout),
+                //                .day10 => try day10.run(allocator, stdout),
+                //                .day11 => try day11.run(allocator, stdout),
+                //                .day12 => try day12.run(allocator, stdout),
+                //                .day13 => try day13.run(allocator, stdout),
+                //                .day14 => try day14.run(allocator, stdout),
+                //                .day15 => try day15.run(allocator, stdout),
+                //                .day16 => try day16.run(allocator, stdout),
+                //                .day17 => try day17.run(allocator, stdout),
+                //                .day18 => try day18.run(allocator, stdout),
+                //                .day19 => try day19.run(allocator, stdout),
+                //                .day20 => try day20.run(allocator, stdout),
+                //                .day21 => try day21.run(allocator, stdout),
+                //                .day22 => try day22.run(allocator, stdout),
+                //                .day23 => try day23.run(allocator, stdout),
+                //                .day24 => try day24.run(allocator, stdout),
+                //                .day25 => try day25.run(allocator, stdout),
                 .all => {
                     try day01.run(allocator, stdout);
-                    //                    try day02.run(alloc, stdout);
-                    //                    try day03.run(alloc, stdout);
-                    //                    try day04.run(alloc, stdout);
-                    //                    try day05.run(alloc, stdout);
-                    //                    try day06.run(alloc, stdout);
-                    //                    try day07.run(alloc, stdout);
-                    //                    try day08.run(alloc, stdout);
-                    //                    try day09.run(alloc, stdout);
-                    //                    try day10.run(alloc, stdout);
-                    //                    try day11.run(alloc, stdout);
-                    //                    try day12.run(alloc, stdout);
-                    //                    try day13.run(alloc, stdout);
-                    //                    try day14.run(alloc, stdout);
-                    //                    try day15.run(alloc, stdout);
-                    //                    try day16.run(alloc, stdout);
-                    //                    try day17.run(alloc, stdout);
-                    //                    try day18.run(alloc, stdout);
-                    //                    try day19.run(alloc, stdout);
-                    //                    try day20.run(alloc, stdout);
-                    //                    try day21.run(alloc, stdout);
-                    //                    try day22.run(alloc, stdout);
-                    //                    try day23.run(alloc, stdout);
-                    //                    try day24.run(alloc, stdout);
-                    //                    try day25.run(alloc, stdout);
+                    try day02.run(allocator, stdout);
+                    //                    try day03.run(allocator, stdout);
+                    //                    try day04.run(allocator, stdout);
+                    //                    try day05.run(allocator, stdout);
+                    //                    try day06.run(allocator, stdout);
+                    //                    try day07.run(allocator, stdout);
+                    //                    try day08.run(allocator, stdout);
+                    //                    try day09.run(allocator, stdout);
+                    //                    try day10.run(allocator, stdout);
+                    //                    try day11.run(allocator, stdout);
+                    //                    try day12.run(allocator, stdout);
+                    //                    try day13.run(allocator, stdout);
+                    //                    try day14.run(allocator, stdout);
+                    //                    try day15.run(allocator, stdout);
+                    //                    try day16.run(allocator, stdout);
+                    //                    try day17.run(allocator, stdout);
+                    //                    try day18.run(allocator, stdout);
+                    //                    try day19.run(allocator, stdout);
+                    //                    try day20.run(allocator, stdout);
+                    //                    try day21.run(allocator, stdout);
+                    //                    try day22.run(allocator, stdout);
+                    //                    try day23.run(allocator, stdout);
+                    //                    try day24.run(allocator, stdout);
+                    //                    try day25.run(allocator, stdout);
                 },
                 else => {
                     try stdout.print("invalid day\n", .{});
