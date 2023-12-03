@@ -1,7 +1,7 @@
 const std = @import("std");
 const day01 = @import("day01.zig");
 const day02 = @import("day02.zig");
-//const day03 = @import("day03.zig");
+const day03 = @import("day03.zig");
 //const day04 = @import("day04.zig");
 //const day05 = @import("day05.zig");
 //const day06 = @import("day06.zig");
@@ -101,7 +101,7 @@ pub fn main() !void {
             switch (day_enum) {
                 .day01 => try day01.run(allocator, stdout),
                 .day02 => try day02.run(allocator, stdout),
-                //                .day03 => try day03.run(allocator, stdout),
+                .day03 => try day03.run(allocator, stdout),
                 //                .day04 => try day04.run(allocator, stdout),
                 //                .day05 => try day05.run(allocator, stdout),
                 //                .day06 => try day06.run(allocator, stdout),
@@ -127,7 +127,7 @@ pub fn main() !void {
                 .all => {
                     try day01.run(allocator, stdout);
                     try day02.run(allocator, stdout);
-                    //                    try day03.run(allocator, stdout);
+                    try day03.run(allocator, stdout);
                     //                    try day04.run(allocator, stdout);
                     //                    try day05.run(allocator, stdout);
                     //                    try day06.run(allocator, stdout);

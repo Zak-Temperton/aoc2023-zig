@@ -6,3 +6,4 @@ My solutions to Advent of Code 2023 in Zig
 | --- | ------------------------------------------------------------------------------- | -------------------------- |
 | 01  | [Trebuchet?!](https://adventofcode.com/2023/day/1)                              | [day01.zig](src/day01.zig) |
 | 02  | [Cube Conundrum](https://adventofcode.com/2023/day/2)                           | [day02.zig](src/day02.zig) |
+| 03  | [Gear Ratios](https://adventofcode.com/2023/day/3)                              | [day03.zig](src/day03.zig) |
