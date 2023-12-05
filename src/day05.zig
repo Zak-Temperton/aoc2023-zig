@@ -82,6 +82,7 @@ fn part2(alloc: Allocator, input: []const u8) !usize {
             var range = try parseInt(u64, words.next().?, 10);
             const dest_end = dest_start + range - 1;
             const source_end = source_start + range - 1;
+            //allow for adding new seed ranges without resizing in loop
             try seeds.ensureTotalCapacity(seeds.items.len * 2);
             for (seeds.items, 0..) |*seed, i| {
                 if (source_start <= seed[1] and source_end >= seed[0]) {
