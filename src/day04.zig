@@ -61,7 +61,7 @@ fn part1(alloc: Allocator, input: []const u8) !usize {
                     num = num * 10 + c - '0';
                 },
                 ' ' => {
-                    if (num != 0 and std.mem.containsAtLeast(u8, winning_numbers.items, 1, &.{num})) {
+                    if (num != 0 and find(u8, winning_numbers.items, 0, num) != null) {
                         if (points == 0) {
                             points = 1;
                         } else {
@@ -71,7 +71,7 @@ fn part1(alloc: Allocator, input: []const u8) !usize {
                     num = 0;
                 },
                 else => {
-                    if (num != 0 and std.mem.containsAtLeast(u8, winning_numbers.items, 1, &.{num})) {
+                    if (num != 0 and find(u8, winning_numbers.items, 0, num) != null) {
                         if (points == 0) {
                             points = 1;
                         } else {
@@ -134,13 +134,13 @@ fn part2(alloc: Allocator, input: []const u8) !usize {
                     num = num * 10 + c - '0';
                 },
                 ' ' => {
-                    if (num != 0 and std.mem.containsAtLeast(u8, winning_numbers.items, 1, &.{num})) {
+                    if (num != 0 and find(u8, winning_numbers.items, 0, num) != null) {
                         matching += 1;
                     }
                     num = 0;
                 },
                 else => {
-                    if (num != 0 and std.mem.containsAtLeast(u8, winning_numbers.items, 1, &.{num})) {
+                    if (num != 0 and find(u8, winning_numbers.items, 0, num) != null) {
                         matching += 1;
                     }
                     for (input[j..], j..) |e, k| {
