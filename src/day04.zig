@@ -18,65 +18,149 @@ pub fn run(alloc: Allocator, stdout: anytype) !void {
     try stdout.print("Day04:\n  part1: {d} {d}ns\n  part2: {d} {d}ns\n", .{ p1, p1_time, p2, p2_time });
 }
 
+fn find(comptime T: type, input: []const T, i: usize, delimiter: T) ?usize {
+    for (input[i..], i..) |c, j| {
+        if (c == delimiter) return j;
+    }
+    return null;
+}
+
 fn part1(alloc: Allocator, input: []const u8) !usize {
     var result: usize = 0;
-    var lines = tokenizeAny(u8, input, "\r\n");
     var winning_numbers = try ArrayList(u8).initCapacity(alloc, 10);
     defer winning_numbers.deinit();
-    while (lines.next()) |line| {
-        var numbers = tokenizeAny(u8, line, ":|");
-        _ = numbers.next();
-
-        var winning = tokenizeAny(u8, numbers.next().?, " ");
-        while (winning.next()) |w| {
-            try winning_numbers.append(try parseInt(u8, w, 10));
+    var i: usize = 0;
+    while (i < input.len) {
+        if (find(u8, input, i, ':')) |j| {
+            i = j + 2;
+        } else {
+            return error.InvalidInput;
+        }
+        var num: u8 = 0;
+        for (input[i..], i..) |c, j| {
+            switch (c) {
+                '0'...'9' => {
+                    num = num * 10 + c - '0';
+                },
+                ' ' => {
+                    if (num != 0) {
+                        try winning_numbers.append(num);
+                    }
+                    num = 0;
+                },
+                else => {
+                    i = j + 2;
+                    break;
+                },
+            }
         }
         var points: usize = 0;
-        var nums = tokenizeAny(u8, numbers.next().?, " ");
-        while (nums.next()) |n| {
-            const num = try parseInt(u8, n, 10);
-            if (std.mem.containsAtLeast(u8, winning_numbers.items, 1, &.{num})) {
-                if (points == 0) {
-                    points = 1;
-                } else {
-                    points *= 2;
-                }
+        match: for (input[i..], i..) |c, j| {
+            switch (c) {
+                '0'...'9' => {
+                    num = num * 10 + c - '0';
+                },
+                ' ' => {
+                    if (num != 0 and std.mem.containsAtLeast(u8, winning_numbers.items, 1, &.{num})) {
+                        if (points == 0) {
+                            points = 1;
+                        } else {
+                            points *= 2;
+                        }
+                    }
+                    num = 0;
+                },
+                else => {
+                    if (num != 0 and std.mem.containsAtLeast(u8, winning_numbers.items, 1, &.{num})) {
+                        if (points == 0) {
+                            points = 1;
+                        } else {
+                            points *= 2;
+                        }
+                    }
+                    for (input[j..], j..) |e, k| {
+                        if (e == '\n') {
+                            i = k + 1;
+                            break :match;
+                        }
+                    }
+                    i = j + 1;
+                    break :match;
+                },
             }
         }
         result += points;
         winning_numbers.clearRetainingCapacity();
     }
+
     return result;
 }
 
 fn part2(alloc: Allocator, input: []const u8) !usize {
     var result: usize = 0;
-    var lines = tokenizeAny(u8, input, "\r\n");
     var cards = ArrayList([2]usize).init(alloc);
     defer cards.deinit();
     var winning_numbers = try ArrayList(u8).initCapacity(alloc, 10);
     defer winning_numbers.deinit();
-    while (lines.next()) |line| {
-        var numbers = tokenizeAny(u8, line, ":|");
-        _ = numbers.next();
-        var winning = tokenizeAny(u8, numbers.next().?, " ");
-        while (winning.next()) |w| {
-            try winning_numbers.append(try parseInt(u8, w, 10));
+    var i: usize = 0;
+    while (i < input.len) {
+        if (find(u8, input, i, ':')) |j| {
+            i = j + 2;
+        } else {
+            return error.InvalidInput;
+        }
+        var num: u8 = 0;
+        for (input[i..], i..) |c, j| {
+            switch (c) {
+                '0'...'9' => {
+                    num = num * 10 + c - '0';
+                },
+                ' ' => {
+                    if (num != 0) {
+                        try winning_numbers.append(num);
+                    }
+                    num = 0;
+                },
+                else => {
+                    i = j + 2;
+                    break;
+                },
+            }
         }
         var matching: usize = 0;
-        var nums = tokenizeAny(u8, numbers.next().?, " ");
-        while (nums.next()) |n| {
-            const num = try parseInt(u8, n, 10);
-            if (std.mem.containsAtLeast(u8, winning_numbers.items, 1, &.{num})) {
-                matching += 1;
+        match: for (input[i..], i..) |c, j| {
+            switch (c) {
+                '0'...'9' => {
+                    num = num * 10 + c - '0';
+                },
+                ' ' => {
+                    if (num != 0 and std.mem.containsAtLeast(u8, winning_numbers.items, 1, &.{num})) {
+                        matching += 1;
+                    }
+                    num = 0;
+                },
+                else => {
+                    if (num != 0 and std.mem.containsAtLeast(u8, winning_numbers.items, 1, &.{num})) {
+                        matching += 1;
+                    }
+                    for (input[j..], j..) |e, k| {
+                        if (e == '\n') {
+                            i = k + 1;
+                            break :match;
+                        }
+                    }
+                    i = j + 1;
+                    break :match;
+                },
             }
         }
         try cards.append(.{ 1, matching });
         winning_numbers.clearRetainingCapacity();
     }
-    for (cards.items, 0..) |card, i| {
+
+    for (cards.items, 1..) |card, j| {
         result += card[0];
-        for (cards.items[i + 1 .. i + card[1] + 1]) |*c| {
+        for (cards.items[j .. j + card[1]]) |*c| {
             c.*[0] += card[0];
         }
     }
