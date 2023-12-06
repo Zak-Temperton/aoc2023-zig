@@ -67,7 +67,7 @@ fn part2(input: []const u8) u64 {
 }
 
 fn binarySearch(range: u64, target: u64) u64 {
-    var min: u64 = 0;
+    var min: u64 = 1;
     var max: u64 = range;
     while (max > min) {
         var pos = min + ((max - min) / 2);
