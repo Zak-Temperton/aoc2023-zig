@@ -56,13 +56,6 @@ fn part2(input: []const u8) u64 {
         }
     }
 
-    var wins: u64 = 0;
-    for (0..time) |p| {
-        if (p * (time - p) > distance) {
-            wins = time - p - p + 1;
-            break;
-        }
-    }
     return binarySearch(time, distance);
 }
 
