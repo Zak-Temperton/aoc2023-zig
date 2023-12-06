@@ -18,38 +18,68 @@ pub fn run(alloc: Allocator, stdout: anytype) !void {
     try stdout.print("Day05:\n  part1: {d} {d}ns\n  part2: {d} {d}ns\n", .{ p1, p1_time, p2, p2_time });
 }
 
+fn readInt(comptime T: type, input: []const u8, i: *usize) T {
+    var num: T = 0;
+    while (i.* < input.len) : (i.* += 1) {
+        switch (input[i.*]) {
+            '0'...'9' => |c| num = num * 10 + c - '0',
+            else => return num,
+        }
+    }
+    return num;
+}
+
+fn skipUntil(input: []const u8, i: *usize, delimiter: u8) void {
+    while (i.* < input.len and input[i.*] != delimiter) : (i.* += 1) {}
+}
+fn skip(input: []const u8, i: *usize, delimiter: u8) void {
+    while (i.* < input.len and input[i.*] == delimiter) : (i.* += 1) {}
+}
+
 fn part1(alloc: Allocator, input: []const u8) !u64 {
     var seeds = ArrayList(u64).init(alloc);
     defer seeds.deinit();
 
-    var lines = tokenizeAny(u8, input, "\r\n");
     //seeds
-    if (lines.next()) |line| {
-        var words = tokenizeAny(u8, line, " ");
-        _ = words.next();
-        while (words.next()) |word| {
-            try seeds.append(try parseInt(u64, word, 10));
-        }
+    var i: usize = 0;
+    skipUntil(input, &i, ' ');
+    while (input[i] == ' ') {
+        i += 1;
+        try seeds.append(readInt(u64, input, &i));
     }
+    //std.debug.print("{d}\n", .{seeds.items});
+    skipUntil(input, &i, '\n');
+    i += 1;
+    skipUntil(input, &i, '\n');
+    i += 1;
     //maps
-    while (lines.index < lines.buffer.len) {
+    while (i < input.len) {
         var new_seeds = try seeds.clone();
         errdefer new_seeds.deinit();
-        while (lines.next()) |line| {
-            if (line[0] >= 'a' and line[0] <= 'z') break;
-            var words = tokenizeAny(u8, line, " ");
-            var dest_start = try parseInt(u64, words.next().?, 10);
-            var source_start = try parseInt(u64, words.next().?, 10);
-            var range = try parseInt(u64, words.next().?, 10);
-            for (seeds.items, 0..) |seed, i| {
+        while (i < input.len) {
+            if (input[i] < '0' or input[i] > '9') {
+                skipUntil(input, &i, '\n');
+                i += 1;
+                break;
+            }
+            const dest_start = readInt(u64, input, &i);
+            skip(input, &i, ' ');
+            const source_start = readInt(u64, input, &i);
+            skip(input, &i, ' ');
+            const range = readInt(u64, input, &i);
+            //std.debug.print("{d} {d} {d}\n", .{ dest_start, source_start, range });
+            skipUntil(input, &i, '\n');
+            i += 1;
+            for (seeds.items, 0..) |seed, j| {
                 if (seed >= source_start and seed < source_start + range) {
-                    new_seeds.items[i] = dest_start + (seed - source_start);
+                    new_seeds.items[j] = dest_start + (seed - source_start);
                 }
             }
         }
 
         seeds.deinit();
         seeds = new_seeds;
+        //std.debug.print("{d}\n", .{seeds.items});
     }
 
     return std.mem.min(u64, seeds.items);
@@ -59,46 +89,61 @@ fn part2(alloc: Allocator, input: []const u8) !usize {
     var seeds = ArrayList([2]u64).init(alloc);
     defer seeds.deinit();
 
-    var lines = tokenizeAny(u8, input, "\r\n");
     //seeds
-    if (lines.next()) |line| {
-        var words = tokenizeAny(u8, line, " ");
-        _ = words.next();
-        while (words.next()) |word| {
-            const start = try parseInt(u64, word, 10);
-            const len = try parseInt(u64, words.next().?, 10);
-            try seeds.append(.{ start, start + len - 1 });
-        }
+    var i: usize = 0;
+    skipUntil(input, &i, ' ');
+    while (input[i] == ' ') {
+        i += 1;
+        const a = readInt(u64, input, &i);
+        skip(input, &i, ' ');
+        const b = readInt(u64, input, &i);
+        try seeds.append(.{ a, a + b - 1 });
     }
+    skipUntil(input, &i, '\n');
+    i += 1;
+    skipUntil(input, &i, '\n');
+    i += 1;
+    skipUntil(input, &i, '\n');
+    i += 1;
+
     //maps
-    while (lines.index < lines.buffer.len) {
+    while (i < input.len) {
         var new_seeds = try seeds.clone();
         errdefer new_seeds.deinit();
-        while (lines.next()) |line| {
-            if (line[0] >= 'a' and line[0] <= 'z') break;
-            var words = tokenizeAny(u8, line, " ");
-            var dest_start = try parseInt(u64, words.next().?, 10);
-            var source_start = try parseInt(u64, words.next().?, 10);
-            var range = try parseInt(u64, words.next().?, 10);
+        while (i < input.len) {
+            if (input[i] < '0' or input[i] > '9') {
+                skipUntil(input, &i, '\n');
+                i += 1;
+                skipUntil(input, &i, '\n');
+                i += 1;
+                break;
+            }
+            const dest_start = readInt(u64, input, &i);
+            skip(input, &i, ' ');
+            const source_start = readInt(u64, input, &i);
+            skip(input, &i, ' ');
+            const range = readInt(u64, input, &i);
+            skipUntil(input, &i, '\n');
+            i += 1;
             const dest_end = dest_start + range - 1;
             const source_end = source_start + range - 1;
             //allow for adding new seed ranges without resizing in loop
             try seeds.ensureTotalCapacity(seeds.items.len * 2);
-            for (seeds.items, 0..) |*seed, i| {
+            for (seeds.items, 0..) |*seed, j| {
                 if (source_start <= seed[1] and source_end >= seed[0]) {
                     if (source_start <= seed[0] and source_end >= seed[1]) {
-                        new_seeds.items[i][0] = dest_start + (seed[0] - source_start);
-                        new_seeds.items[i][1] = dest_start + (seed[1] - source_start);
+                        new_seeds.items[j][0] = dest_start + (seed[0] - source_start);
+                        new_seeds.items[j][1] = dest_start + (seed[1] - source_start);
                     } else if (source_start <= seed[0] and source_end < seed[1]) {
-                        new_seeds.items[i][0] = source_start + range;
+                        new_seeds.items[j][0] = source_start + range;
                         try new_seeds.append(.{ dest_start + (seed[0] - source_start), dest_end });
                         seed[0] = source_end + 1;
                     } else if (source_start > seed[0] and source_end >= seed[1]) {
-                        new_seeds.items[i][1] = source_start - 1;
+                        new_seeds.items[j][1] = source_start - 1;
                         try new_seeds.append(.{ dest_start, dest_start + (seed[1] - source_start) });
                         seed[1] = source_start - 1;
                     } else if (source_start > seed[0] and source_end < seed[1]) {
-                        new_seeds.items[i][1] = source_start - 1;
+                        new_seeds.items[j][1] = source_start - 1;
                         try new_seeds.append(.{ dest_start, dest_end });
                         try new_seeds.append(.{ source_start + range, seed[1] });
                         seeds.appendAssumeCapacity(.{ source_start + range, seed[1] });
