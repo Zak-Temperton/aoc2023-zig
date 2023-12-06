@@ -14,48 +14,64 @@ pub fn run(alloc: Allocator, stdout: anytype) !void {
     try stdout.print("Day06:\n  part1: {d} {d}ns\n  part2: {d} {d}ns\n", .{ p1, p1_time, p2, p2_time });
 }
 
+fn readInt(comptime T: type, input: []const u8, i: *usize) T {
+    var num: T = 0;
+    while (i.* < input.len) : (i.* += 1) {
+        switch (input[i.*]) {
+            '0'...'9' => |c| num = num * 10 + c - '0',
+            else => return num,
+        }
+    }
+    return num;
+}
+
+fn skipUntil(input: []const u8, i: *usize, delimiter: u8) void {
+    while (i.* < input.len and input[i.*] != delimiter) : (i.* += 1) {}
+}
+
+fn skip(input: []const u8, i: *usize, delimiter: u8) void {
+    while (i.* < input.len and input[i.*] == delimiter) : (i.* += 1) {}
+}
+
 fn part1(input: []const u8) !u64 {
     var result: u64 = 1;
-    var lines = std.mem.tokenizeAny(u8, input, "\r\n");
-    var times = std.mem.tokenizeAny(u8, lines.next().?, " ");
-    var distances = std.mem.tokenizeAny(u8, lines.next().?, " ");
-    _ = times.next();
-    _ = distances.next();
+    var i: usize = 0;
+    skipUntil(input, &i, ' ');
+    skip(input, &i, ' ');
+    var j: usize = i;
+    skipUntil(input, &j, ':');
+    j += 1;
+    skip(input, &j, ' ');
 
-    while (times.next()) |time| {
-        if (distances.next()) |distance| {
-            const t = try std.fmt.parseInt(u64, time, 10);
-            const d = try std.fmt.parseInt(u64, distance, 10);
-            result *= binarySearch(t, d);
-        }
+    while (input[j] != '\r') {
+        var t = readInt(u64, input, &i);
+        skip(input, &i, ' ');
+        var d = readInt(u64, input, &j);
+        skip(input, &j, ' ');
+        result *= binarySearch(t, d);
     }
 
     return result;
 }
 
-fn part2(input: []const u8) u64 {
-    var lines = std.mem.tokenizeAny(u8, input, "\r\n");
-    var time: u64 = 0;
-    if (lines.next()) |line| {
-        var words = std.mem.tokenizeAny(u8, line, " ");
-        _ = words.next();
-        while (words.next()) |word| {
-            for (word) |c| {
-                time = time * 10 + c - '0';
-            }
+fn readInts(comptime T: type, input: []const u8, i: *usize) T {
+    var num: T = 0;
+    while (i.* < input.len) : (i.* += 1) {
+        switch (input[i.*]) {
+            '0'...'9' => |c| num = num * 10 + c - '0',
+            ' ' => {},
+            else => return num,
         }
     }
-    var distance: u64 = 0;
-    if (lines.next()) |line| {
-        var words = std.mem.tokenizeAny(u8, line, " ");
-        _ = words.next();
-        while (words.next()) |word| {
-            for (word) |c| {
-                distance = distance * 10 + c - '0';
-            }
-        }
-    }
+    return num;
+}
 
+fn part2(input: []const u8) u64 {
+    var i: usize = 0;
+    skipUntil(input, &i, ' ');
+    var time: u64 = readInts(u64, input, &i);
+    skipUntil(input, &i, ' ');
+    var distance: u64 = readInts(u64, input, &i);
     return binarySearch(time, distance);
 }
 
