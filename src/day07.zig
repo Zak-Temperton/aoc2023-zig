@@ -45,6 +45,122 @@ fn charToNum(char: u8) u8 {
     };
 }
 
+const Hand = struct { cards: []const u8, val: u64 };
+
+const Game = struct {
+    five_kind: std.ArrayList(Hand),
+    four_kind: std.ArrayList(Hand),
+    full_house: std.ArrayList(Hand),
+    three_kind: std.ArrayList(Hand),
+    two_pair: std.ArrayList(Hand),
+    one_pair: std.ArrayList(Hand),
+    high_card: std.ArrayList(Hand),
+
+    fn init(alloc: Allocator) Game {
+        return .{
+            .five_kind = std.ArrayList(Hand).init(alloc),
+            .four_kind = std.ArrayList(Hand).init(alloc),
+            .full_house = std.ArrayList(Hand).init(alloc),
+            .three_kind = std.ArrayList(Hand).init(alloc),
+            .two_pair = std.ArrayList(Hand).init(alloc),
+            .one_pair = std.ArrayList(Hand).init(alloc),
+            .high_card = std.ArrayList(Hand).init(alloc),
+        };
+    }
+
+    fn deinit(self: *Game) void {
+        self.five_kind.deinit();
+        self.four_kind.deinit();
+        self.full_house.deinit();
+        self.three_kind.deinit();
+        self.two_pair.deinit();
+        self.one_pair.deinit();
+        self.high_card.deinit();
+    }
+
+    fn appendHand(self: *Game, hand: Hand, counts: [14]u8) !void {
+        for (counts, 0..) |count, a| {
+            switch (count) {
+                0, 1 => {},
+                2 => {
+                    for (counts[a + 1 ..]) |count2| {
+                        if (count2 == 3) {
+                            try self.full_house.append(hand);
+                            return;
+                        } else if (count2 == 2) {
+                            try self.two_pair.append(hand);
+                            return;
+                        }
+                    }
+                    try self.one_pair.append(hand);
+                    return;
+                },
+                3 => {
+                    for (counts[a + 1 ..]) |count2| {
+                        if (count2 == 2) {
+                            try self.full_house.append(hand);
+                            return;
+                        }
+                    }
+                    try self.three_kind.append(hand);
+                    return;
+                },
+                4 => {
+                    try self.four_kind.append(hand);
+                    return;
+                },
+                5 => {
+                    try self.five_kind.append(hand);
+                    return;
+                },
+                else => unreachable,
+            }
+        }
+        try self.high_card.append(hand);
+    }
+
+    fn solve(self: *Game, comptime lessThanFn: fn (void, lhs: Hand, rhs: Hand) bool) u64 {
+        std.mem.sortUnstable(Hand, self.five_kind.items, {}, lessThanFn);
+        std.mem.sortUnstable(Hand, self.four_kind.items, {}, lessThanFn);
+        std.mem.sortUnstable(Hand, self.full_house.items, {}, lessThanFn);
+        std.mem.sortUnstable(Hand, self.three_kind.items, {}, lessThanFn);
+        std.mem.sortUnstable(Hand, self.two_pair.items, {}, lessThanFn);
+        std.mem.sortUnstable(Hand, self.one_pair.items, {}, lessThanFn);
+        std.mem.sortUnstable(Hand, self.high_card.items, {}, lessThanFn);
+        var result: u64 = 0;
+        var rank: u64 = 1;
+        for (self.high_card.items) |card| {
+            result += card.val * rank;
+            rank += 1;
+        }
+        for (self.one_pair.items) |card| {
+            result += card.val * rank;
+            rank += 1;
+        }
+        for (self.two_pair.items) |card| {
+            result += card.val * rank;
+            rank += 1;
+        }
+        for (self.three_kind.items) |card| {
+            result += card.val * rank;
+            rank += 1;
+        }
+        for (self.full_house.items) |card| {
+            result += card.val * rank;
+            rank += 1;
+        }
+        for (self.four_kind.items) |card| {
+            result += card.val * rank;
+            rank += 1;
+        }
+        for (self.five_kind.items) |card| {
+            result += card.val * rank;
+            rank += 1;
+        }
+        return result;
+    }
+};
+
 fn asc(context: void, lhs: Hand, rhs: Hand) bool {
     _ = context;
     var i: usize = 0;
@@ -52,26 +168,11 @@ fn asc(context: void, lhs: Hand, rhs: Hand) bool {
     return charToNum(lhs.cards[i]) < charToNum(rhs.cards[i]);
 }
 
-const Hand = struct { cards: []const u8, val: u64 };
-
 fn part1(alloc: Allocator, input: []const u8) !u64 {
-    var five_kind = std.ArrayList(Hand).init(alloc);
-    defer five_kind.deinit();
-    var four_kind = std.ArrayList(Hand).init(alloc);
-    defer four_kind.deinit();
-    var full_house = std.ArrayList(Hand).init(alloc);
-    defer full_house.deinit();
-    var three_kind = std.ArrayList(Hand).init(alloc);
-    defer three_kind.deinit();
-    var two_pair = std.ArrayList(Hand).init(alloc);
-    defer two_pair.deinit();
-    var one_pair = std.ArrayList(Hand).init(alloc);
-    defer one_pair.deinit();
-    var high_card = std.ArrayList(Hand).init(alloc);
-    defer high_card.deinit();
-
+    var game = Game.init(alloc);
+    defer game.deinit();
     var i: usize = 0;
-    loop: while (i < input.len) {
+    while (i < input.len) {
         var j = i;
         skipUntil(input, &j, ' ');
         var counts: [14]u8 = [1]u8{0} ** 14;
@@ -80,87 +181,14 @@ fn part1(alloc: Allocator, input: []const u8) !u64 {
         }
         j += 1;
         const val = readInt(u64, input, &j);
-        const card = Hand{ .cards = input[i .. j - 1], .val = val };
+        const hand = Hand{ .cards = input[i .. j - 1], .val = val };
         skipUntil(input, &j, '\n');
         j += 1;
         i = j;
-        for (counts, 0..) |count, a| {
-            switch (count) {
-                0, 1 => {},
-                2 => {
-                    for (counts[a + 1 ..]) |count2| {
-                        if (count2 == 3) {
-                            try full_house.append(card);
-                            continue :loop;
-                        } else if (count2 == 2) {
-                            try two_pair.append(card);
-                            continue :loop;
-                        }
-                    }
-                    try one_pair.append(card);
-                    continue :loop;
-                },
-                3 => {
-                    for (counts[a + 1 ..]) |count2| {
-                        if (count2 == 2) {
-                            try full_house.append(card);
-                            continue :loop;
-                        }
-                    }
-                    try three_kind.append(card);
-                    continue :loop;
-                },
-                4 => {
-                    try four_kind.append(card);
-                    continue :loop;
-                },
-                5 => {
-                    try five_kind.append(card);
-                    continue :loop;
-                },
-                else => unreachable,
-            }
-        }
-        try high_card.append(card);
+        try game.appendHand(hand, counts);
     }
-    std.mem.sortUnstable(Hand, five_kind.items, {}, asc);
-    std.mem.sortUnstable(Hand, four_kind.items, {}, asc);
-    std.mem.sortUnstable(Hand, full_house.items, {}, asc);
-    std.mem.sortUnstable(Hand, three_kind.items, {}, asc);
-    std.mem.sortUnstable(Hand, two_pair.items, {}, asc);
-    std.mem.sortUnstable(Hand, one_pair.items, {}, asc);
-    std.mem.sortUnstable(Hand, high_card.items, {}, asc);
-    var result: u64 = 0;
-    var rank: u64 = 1;
-    for (high_card.items) |card| {
-        result += card.val * rank;
-        rank += 1;
-    }
-    for (one_pair.items) |card| {
-        result += card.val * rank;
-        rank += 1;
-    }
-    for (two_pair.items) |card| {
-        result += card.val * rank;
-        rank += 1;
-    }
-    for (three_kind.items) |card| {
-        result += card.val * rank;
-        rank += 1;
-    }
-    for (full_house.items) |card| {
-        result += card.val * rank;
-        rank += 1;
-    }
-    for (four_kind.items) |card| {
-        result += card.val * rank;
-        rank += 1;
-    }
-    for (five_kind.items) |card| {
-        result += card.val * rank;
-        rank += 1;
-    }
-    return result;
+
+    return game.solve(asc);
 }
 
 fn charToNum2(char: u8) u8 {
@@ -182,23 +210,10 @@ fn asc2(context: void, lhs: Hand, rhs: Hand) bool {
 }
 
 fn part2(alloc: Allocator, input: []const u8) !u64 {
-    var five_kind = std.ArrayList(Hand).init(alloc);
-    defer five_kind.deinit();
-    var four_kind = std.ArrayList(Hand).init(alloc);
-    defer four_kind.deinit();
-    var full_house = std.ArrayList(Hand).init(alloc);
-    defer full_house.deinit();
-    var three_kind = std.ArrayList(Hand).init(alloc);
-    defer three_kind.deinit();
-    var two_pair = std.ArrayList(Hand).init(alloc);
-    defer two_pair.deinit();
-    var one_pair = std.ArrayList(Hand).init(alloc);
-    defer one_pair.deinit();
-    var high_card = std.ArrayList(Hand).init(alloc);
-    defer high_card.deinit();
-
+    var game = Game.init(alloc);
+    defer game.deinit();
     var i: usize = 0;
-    loop: while (i < input.len) {
+    while (i < input.len) {
         var j = i;
         skipUntil(input, &j, ' ');
         var counts: [14]u8 = [1]u8{0} ** 14;
@@ -213,89 +228,15 @@ fn part2(alloc: Allocator, input: []const u8) !u64 {
         if (jokers > 0) counts[std.mem.indexOfMax(u8, &counts)] += jokers;
         j += 1;
         const val = readInt(u64, input, &j);
-        const card = Hand{ .cards = input[i .. j - 1], .val = val };
+        const hand = Hand{ .cards = input[i .. j - 1], .val = val };
         skipUntil(input, &j, '\n');
         j += 1;
         i = j;
-        for (counts, 0..) |count, a| {
-            switch (count) {
-                0, 1 => {},
-                2 => {
-                    for (counts[a + 1 ..]) |count2| {
-                        if (count2 == 3) {
-                            try full_house.append(card);
-                            continue :loop;
-                        } else if (count2 == 2) {
-                            try two_pair.append(card);
-                            continue :loop;
-                        }
-                    }
-                    try one_pair.append(card);
-                    continue :loop;
-                },
-                3 => {
-                    for (counts[a + 1 ..]) |count2| {
-                        if (count2 == 2) {
-                            try full_house.append(card);
-                            continue :loop;
-                        }
-                    }
-                    try three_kind.append(card);
-                    continue :loop;
-                },
-                4 => {
-                    try four_kind.append(card);
-                    continue :loop;
-                },
-                5 => {
-                    try five_kind.append(card);
-                    continue :loop;
-                },
-                else => unreachable,
-            }
-        }
-        try high_card.append(card);
+
+        try game.appendHand(hand, counts);
     }
 
-    std.mem.sortUnstable(Hand, five_kind.items, {}, asc2);
-    std.mem.sortUnstable(Hand, four_kind.items, {}, asc2);
-    std.mem.sortUnstable(Hand, full_house.items, {}, asc2);
-    std.mem.sortUnstable(Hand, three_kind.items, {}, asc2);
-    std.mem.sortUnstable(Hand, two_pair.items, {}, asc2);
-    std.mem.sortUnstable(Hand, one_pair.items, {}, asc2);
-    std.mem.sortUnstable(Hand, high_card.items, {}, asc2);
-
-    var result: u64 = 0;
-    var rank: u64 = 1;
-    for (high_card.items) |card| {
-        result += card.val * rank;
-        rank += 1;
-    }
-    for (one_pair.items) |card| {
-        result += card.val * rank;
-        rank += 1;
-    }
-    for (two_pair.items) |card| {
-        result += card.val * rank;
-        rank += 1;
-    }
-    for (three_kind.items) |card| {
-        result += card.val * rank;
-        rank += 1;
-    }
-    for (full_house.items) |card| {
-        result += card.val * rank;
-        rank += 1;
-    }
-    for (four_kind.items) |card| {
-        result += card.val * rank;
-        rank += 1;
-    }
-    for (five_kind.items) |card| {
-        result += card.val * rank;
-        rank += 1;
-    }
-    return result;
+    return game.solve(asc2);
 }
 
 test "part1" {
