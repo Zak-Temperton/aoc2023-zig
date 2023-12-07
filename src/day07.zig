@@ -176,12 +176,13 @@ fn part1(alloc: Allocator, input: []const u8) !u64 {
         var j = i;
         skipUntil(input, &j, ' ');
         var counts: [14]u8 = [1]u8{0} ** 14;
-        for (input[i..j]) |c| {
+        const cards = input[i..j];
+        for (cards) |c| {
             counts[charToNum(c)] += 1;
         }
         j += 1;
         const val = readInt(u64, input, &j);
-        const hand = Hand{ .cards = input[i .. j - 1], .val = val };
+        const hand = Hand{ .cards = cards, .val = val };
         skipUntil(input, &j, '\n');
         j += 1;
         i = j;
@@ -218,7 +219,8 @@ fn part2(alloc: Allocator, input: []const u8) !u64 {
         skipUntil(input, &j, ' ');
         var counts: [14]u8 = [1]u8{0} ** 14;
         var jokers: u8 = 0;
-        for (input[i..j]) |c| {
+        const cards = input[i..j];
+        for (cards) |c| {
             if (c == 'J') {
                 jokers += 1;
             } else {
@@ -228,7 +230,7 @@ fn part2(alloc: Allocator, input: []const u8) !u64 {
         if (jokers > 0) counts[std.mem.indexOfMax(u8, &counts)] += jokers;
         j += 1;
         const val = readInt(u64, input, &j);
-        const hand = Hand{ .cards = input[i .. j - 1], .val = val };
+        const hand = Hand{ .cards = cards, .val = val };
         skipUntil(input, &j, '\n');
         j += 1;
         i = j;
