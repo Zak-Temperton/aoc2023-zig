@@ -45,21 +45,29 @@ fn charToNum(char: u8) u8 {
     };
 }
 
-const Card = struct { cards: []const u8, val: u64 };
+fn asc(context: void, lhs: Hand, rhs: Hand) bool {
+    _ = context;
+    var i: usize = 0;
+    while (lhs.cards[i] == rhs.cards[i]) : (i += 1) {}
+    return charToNum(lhs.cards[i]) < charToNum(rhs.cards[i]);
+}
+
+const Hand = struct { cards: []const u8, val: u64 };
+
 fn part1(alloc: Allocator, input: []const u8) !u64 {
-    var five_kind = std.ArrayList(Card).init(alloc);
+    var five_kind = std.ArrayList(Hand).init(alloc);
     defer five_kind.deinit();
-    var four_kind = std.ArrayList(Card).init(alloc);
+    var four_kind = std.ArrayList(Hand).init(alloc);
     defer four_kind.deinit();
-    var full_house = std.ArrayList(Card).init(alloc);
+    var full_house = std.ArrayList(Hand).init(alloc);
     defer full_house.deinit();
-    var three_kind = std.ArrayList(Card).init(alloc);
+    var three_kind = std.ArrayList(Hand).init(alloc);
     defer three_kind.deinit();
-    var two_pair = std.ArrayList(Card).init(alloc);
+    var two_pair = std.ArrayList(Hand).init(alloc);
     defer two_pair.deinit();
-    var one_pair = std.ArrayList(Card).init(alloc);
+    var one_pair = std.ArrayList(Hand).init(alloc);
     defer one_pair.deinit();
-    var high_card = std.ArrayList(Card).init(alloc);
+    var high_card = std.ArrayList(Hand).init(alloc);
     defer high_card.deinit();
 
     var i: usize = 0;
@@ -72,7 +80,7 @@ fn part1(alloc: Allocator, input: []const u8) !u64 {
         }
         j += 1;
         const val = readInt(u64, input, &j);
-        const card = Card{ .cards = input[i .. j - 1], .val = val };
+        const card = Hand{ .cards = input[i .. j - 1], .val = val };
         skipUntil(input, &j, '\n');
         j += 1;
         i = j;
@@ -115,13 +123,13 @@ fn part1(alloc: Allocator, input: []const u8) !u64 {
         }
         try high_card.append(card);
     }
-    std.mem.sort(Card, five_kind.items, {}, asc);
-    std.mem.sort(Card, four_kind.items, {}, asc);
-    std.mem.sort(Card, full_house.items, {}, asc);
-    std.mem.sort(Card, three_kind.items, {}, asc);
-    std.mem.sort(Card, two_pair.items, {}, asc);
-    std.mem.sort(Card, one_pair.items, {}, asc);
-    std.mem.sort(Card, high_card.items, {}, asc);
+    std.mem.sortUnstable(Hand, five_kind.items, {}, asc);
+    std.mem.sortUnstable(Hand, four_kind.items, {}, asc);
+    std.mem.sortUnstable(Hand, full_house.items, {}, asc);
+    std.mem.sortUnstable(Hand, three_kind.items, {}, asc);
+    std.mem.sortUnstable(Hand, two_pair.items, {}, asc);
+    std.mem.sortUnstable(Hand, one_pair.items, {}, asc);
+    std.mem.sortUnstable(Hand, high_card.items, {}, asc);
     var result: u64 = 0;
     var rank: u64 = 1;
     for (high_card.items) |card| {
@@ -154,12 +162,6 @@ fn part1(alloc: Allocator, input: []const u8) !u64 {
     }
     return result;
 }
-fn asc(context: void, lhs: Card, rhs: Card) bool {
-    _ = context;
-    var i: usize = 0;
-    while (lhs.cards[i] == rhs.cards[i]) : (i += 1) {}
-    return charToNum(lhs.cards[i]) < charToNum(rhs.cards[i]);
-}
 
 fn charToNum2(char: u8) u8 {
     return switch (char) {
@@ -172,7 +174,7 @@ fn charToNum2(char: u8) u8 {
         else => unreachable,
     };
 }
-fn asc2(context: void, lhs: Card, rhs: Card) bool {
+fn asc2(context: void, lhs: Hand, rhs: Hand) bool {
     _ = context;
     var i: usize = 0;
     while (lhs.cards[i] == rhs.cards[i]) : (i += 1) {}
@@ -180,19 +182,19 @@ fn asc2(context: void, lhs: Card, rhs: Card) bool {
 }
 
 fn part2(alloc: Allocator, input: []const u8) !u64 {
-    var five_kind = std.ArrayList(Card).init(alloc);
+    var five_kind = std.ArrayList(Hand).init(alloc);
     defer five_kind.deinit();
-    var four_kind = std.ArrayList(Card).init(alloc);
+    var four_kind = std.ArrayList(Hand).init(alloc);
     defer four_kind.deinit();
-    var full_house = std.ArrayList(Card).init(alloc);
+    var full_house = std.ArrayList(Hand).init(alloc);
     defer full_house.deinit();
-    var three_kind = std.ArrayList(Card).init(alloc);
+    var three_kind = std.ArrayList(Hand).init(alloc);
     defer three_kind.deinit();
-    var two_pair = std.ArrayList(Card).init(alloc);
+    var two_pair = std.ArrayList(Hand).init(alloc);
     defer two_pair.deinit();
-    var one_pair = std.ArrayList(Card).init(alloc);
+    var one_pair = std.ArrayList(Hand).init(alloc);
     defer one_pair.deinit();
-    var high_card = std.ArrayList(Card).init(alloc);
+    var high_card = std.ArrayList(Hand).init(alloc);
     defer high_card.deinit();
 
     var i: usize = 0;
@@ -211,7 +213,7 @@ fn part2(alloc: Allocator, input: []const u8) !u64 {
         if (jokers > 0) counts[std.mem.indexOfMax(u8, &counts)] += jokers;
         j += 1;
         const val = readInt(u64, input, &j);
-        const card = Card{ .cards = input[i .. j - 1], .val = val };
+        const card = Hand{ .cards = input[i .. j - 1], .val = val };
         skipUntil(input, &j, '\n');
         j += 1;
         i = j;
@@ -254,13 +256,14 @@ fn part2(alloc: Allocator, input: []const u8) !u64 {
         }
         try high_card.append(card);
     }
-    std.mem.sort(Card, five_kind.items, {}, asc2);
-    std.mem.sort(Card, four_kind.items, {}, asc2);
-    std.mem.sort(Card, full_house.items, {}, asc2);
-    std.mem.sort(Card, three_kind.items, {}, asc2);
-    std.mem.sort(Card, two_pair.items, {}, asc2);
-    std.mem.sort(Card, one_pair.items, {}, asc2);
-    std.mem.sort(Card, high_card.items, {}, asc2);
+
+    std.mem.sortUnstable(Hand, five_kind.items, {}, asc2);
+    std.mem.sortUnstable(Hand, four_kind.items, {}, asc2);
+    std.mem.sortUnstable(Hand, full_house.items, {}, asc2);
+    std.mem.sortUnstable(Hand, three_kind.items, {}, asc2);
+    std.mem.sortUnstable(Hand, two_pair.items, {}, asc2);
+    std.mem.sortUnstable(Hand, one_pair.items, {}, asc2);
+    std.mem.sortUnstable(Hand, high_card.items, {}, asc2);
 
     var result: u64 = 0;
     var rank: u64 = 1;
