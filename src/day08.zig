@@ -33,16 +33,6 @@ fn stringToNode(str: []const u8) u32 {
     return node;
 }
 
-fn nodeToString(node: u32) [3]u8 {
-    var n = node;
-    var str: [3]u8 = undefined;
-    for (&str) |*c| {
-        c.* = @truncate('A' + (n & 0x1F));
-        n >>= 5;
-    }
-    return str;
-}
-
 fn part1(alloc: Allocator, input: []const u8) !u64 {
     var i: usize = 0;
     const path = readWord(input, &i);
@@ -104,9 +94,7 @@ fn part2(alloc: Allocator, input: []const u8) !u64 {
         try paths.put(stringToNode(key), .{ stringToNode(left), stringToNode(right) });
     }
 
-    var starting = try std.ArrayList(u64).initCapacity(alloc, current.items.len);
-    defer starting.deinit();
-
+    var all_steps: u64 = 1;
     for (current.items) |*curr| {
         var steps: u64 = 0;
         loop: while (true) {
@@ -121,14 +109,10 @@ fn part2(alloc: Allocator, input: []const u8) !u64 {
                 steps += 1;
             }
         }
-        try starting.append(steps);
+        all_steps = (steps / std.math.gcd(all_steps, steps)) * all_steps;
     }
 
-    var steps: u64 = 1;
-    for (starting.items) |n| {
-        steps = (steps / std.math.gcd(n, steps)) * n;
-    }
-    return steps;
+    return all_steps;
 }
 
 test "part1" {
