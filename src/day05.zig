@@ -47,7 +47,6 @@ fn part1(alloc: Allocator, input: []const u8) !u64 {
         i += 1;
         try seeds.append(readInt(u64, input, &i));
     }
-    //std.debug.print("{d}\n", .{seeds.items});
     skipUntil(input, &i, '\n');
     i += 1;
     skipUntil(input, &i, '\n');
@@ -67,7 +66,6 @@ fn part1(alloc: Allocator, input: []const u8) !u64 {
             const source_start = readInt(u64, input, &i);
             skip(input, &i, ' ');
             const range = readInt(u64, input, &i);
-            //std.debug.print("{d} {d} {d}\n", .{ dest_start, source_start, range });
             skipUntil(input, &i, '\n');
             i += 1;
             for (seeds.items, 0..) |seed, j| {
@@ -79,7 +77,6 @@ fn part1(alloc: Allocator, input: []const u8) !u64 {
 
         seeds.deinit();
         seeds = new_seeds;
-        //std.debug.print("{d}\n", .{seeds.items});
     }
 
     return std.mem.min(u64, seeds.items);
