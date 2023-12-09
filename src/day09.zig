@@ -42,9 +42,10 @@ fn nextLine(input: []const u8, i: *usize) void {
 fn part1(alloc: Allocator, input: []const u8) !i64 {
     var result: i64 = 0;
     var i: usize = 0;
+    var diffs = std.ArrayList(i64).init(alloc);
+    defer diffs.deinit();
     while (i < input.len) {
-        var diffs = std.ArrayList(i64).init(alloc);
-        defer diffs.deinit();
+        diffs.clearRetainingCapacity();
         try diffs.append(readInt(input, &i));
         while (i < input.len and input[i] == ' ') {
             i += 1;
@@ -73,9 +74,12 @@ fn part1(alloc: Allocator, input: []const u8) !i64 {
 fn part2(alloc: Allocator, input: []const u8) !i64 {
     var result: i64 = 0;
     var i: usize = 0;
+    var diffs = std.ArrayList(i64).init(alloc);
+    defer diffs.deinit();
+    var first = std.ArrayList(i64).init(alloc);
+    defer first.deinit();
     while (i < input.len) {
-        var diffs = std.ArrayList(i64).init(alloc);
-        defer diffs.deinit();
+        diffs.clearRetainingCapacity();
         try diffs.append(readInt(input, &i));
         while (i < input.len and input[i] == ' ') {
             i += 1;
@@ -84,8 +88,8 @@ fn part2(alloc: Allocator, input: []const u8) !i64 {
         nextLine(input, &i);
 
         var sum: i64 = 0;
-        var first = std.ArrayList(i64).init(alloc);
-        defer first.deinit();
+
+        first.clearRetainingCapacity();
         var different = true;
         while (different) {
             different = false;
