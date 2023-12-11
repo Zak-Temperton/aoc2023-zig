@@ -14,3 +14,4 @@ My solutions to Advent of Code 2023 in Zig
 | 08  | [Haunted Wasteland](https://adventofcode.com/2023/day/8)                        | [day08.zig](src/day08.zig) |
 | 09  | [Mirage Maintenance](https://adventofcode.com/2023/day/9)                       | [day09.zig](src/day09.zig) |
 | 10  | [Pipe Maze](https://adventofcode.com/2023/day/10)                               | [day10.zig](src/day10.zig) |
+| 11  | [Cosmic Expansion](https://adventofcode.com/2023/day/11)                        | [day11.zig](src/day11.zig) |
