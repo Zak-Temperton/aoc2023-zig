@@ -11,7 +11,7 @@ pub fn run(alloc: Allocator, stdout: anytype) !void {
     const p1_time = timer.lap();
     const p2 = try part2(alloc, buffer);
     const p2_time = timer.read();
-    try stdout.print("Day13:\n  part1: {d} {d}ns\n  part2: {d} {d}ns\n", .{ p1, p1_time, p2, p2_time });
+    try stdout.print("Day12:\n  part1: {d} {d}ns\n  part2: {d} {d}ns\n", .{ p1, p1_time, p2, p2_time });
 }
 
 fn nextLine(input: []const u8, i: *usize) void {
@@ -176,34 +176,32 @@ fn part2(alloc: Allocator, input: []const u8) !usize {
     var count: usize = 0;
     var layout = std.ArrayList(u2).init(alloc);
     defer layout.deinit();
-    var folded_layout = std.ArrayList(u2).init(alloc);
-    defer folded_layout.deinit();
     var arrangement = std.ArrayList(u8).init(alloc);
     defer arrangement.deinit();
-    var folded_arrangement = std.ArrayList(u8).init(alloc);
-    defer folded_arrangement.deinit();
     while (i < input.len) {
         try readLayout(&layout, input, &i);
+        var len = layout.items.len;
+        try layout.ensureTotalCapacity(layout.items.len * 5 + 4);
         for (0..4) |_| {
-            try folded_layout.appendSlice(layout.items);
-            try folded_layout.append(1);
+            layout.appendAssumeCapacity(1);
+            layout.appendSliceAssumeCapacity(layout.items[0..len]);
         }
-        try folded_layout.appendSlice(layout.items);
 
         i += 1;
 
         try readArrangement(&arrangement, input, &i);
-        for (0..5) |_| {
-            try folded_arrangement.appendSlice(arrangement.items);
+        len = arrangement.items.len;
+        try arrangement.ensureTotalCapacity(arrangement.items.len * 5);
+        for (0..4) |_| {
+            arrangement.appendSliceAssumeCapacity(arrangement.items[0..len]);
         }
+
         nextLine(input, &i);
 
-        count += try possibilities2(alloc, folded_layout.items, folded_arrangement.items);
+        count += try possibilities2(alloc, layout.items, arrangement.items);
 
         layout.clearRetainingCapacity();
-        folded_layout.clearRetainingCapacity();
         arrangement.clearRetainingCapacity();
-        folded_arrangement.clearRetainingCapacity();
     }
     return count;
 }
