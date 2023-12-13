@@ -89,7 +89,7 @@ fn part1(alloc: Allocator, input: []const u8) !usize {
     return sum;
 }
 
-fn smugdedMirrors(items: []u32) ?usize {
+fn smudgedMirrors(items: []u32) ?usize {
     var i: usize = 1;
     loop: while (i < items.len) : (i += 2) {
         var sum: u6 = 0;
@@ -154,10 +154,10 @@ fn part2(alloc: Allocator, input: []const u8) !usize {
             try verticle.append(num);
         }
 
-        if (smugdedMirrors(horizontal.items)) |m| {
+        if (smudgedMirrors(horizontal.items)) |m| {
             sum += 100 * m;
         }
-        if (smugdedMirrors(verticle.items)) |m| {
+        if (smudgedMirrors(verticle.items)) |m| {
             sum += m;
         }
 
