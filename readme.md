@@ -17,3 +17,4 @@ My solutions to Advent of Code 2023 in Zig
 | 11  | [Cosmic Expansion](https://adventofcode.com/2023/day/11)                        | [day11.zig](src/day11.zig) |
 | 12  | [Hot Springs](https://adventofcode.com/2023/day/12)                             | [day12.zig](src/day12.zig) |
 | 13  | [Point of Incidence](https://adventofcode.com/2023/day/13)                      | [day13.zig](src/day13.zig) |
+| 14  | [Parabolic Reflector Dish](https://adventofcode.com/2023/day/14)                | [day14.zig](src/day14.zig) |
