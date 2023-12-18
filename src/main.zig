@@ -16,7 +16,7 @@ const day14 = @import("day14.zig");
 const day15 = @import("day15.zig");
 const day16 = @import("day16.zig");
 const day17 = @import("day17.zig");
-//const day18 = @import("day18.zig");
+const day18 = @import("day18.zig");
 //const day19 = @import("day19.zig");
 //const day20 = @import("day20.zig");
 //const day21 = @import("day21.zig");
@@ -116,7 +116,7 @@ pub fn main() !void {
                 .day15 => try day15.run(allocator, stdout),
                 .day16 => try day16.run(allocator, stdout),
                 .day17 => try day17.run(allocator, stdout),
-                //                .day18 => try day18.run(allocator, stdout),
+                .day18 => try day18.run(allocator, stdout),
                 //                .day19 => try day19.run(allocator, stdout),
                 //                .day20 => try day20.run(allocator, stdout),
                 //                .day21 => try day21.run(allocator, stdout),
@@ -142,7 +142,7 @@ pub fn main() !void {
                     try day15.run(allocator, stdout);
                     try day16.run(allocator, stdout);
                     try day17.run(allocator, stdout);
-                    //                    try day18.run(allocator, stdout);
+                    try day18.run(allocator, stdout);
                     //                    try day19.run(allocator, stdout);
                     //                    try day20.run(allocator, stdout);
                     //                    try day21.run(allocator, stdout);
