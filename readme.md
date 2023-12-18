@@ -20,3 +20,4 @@ My solutions to Advent of Code 2023 in Zig
 | 14  | [Parabolic Reflector Dish](https://adventofcode.com/2023/day/14)                | [day14.zig](src/day14.zig) |
 | 15  | [Lens Library](https://adventofcode.com/2023/day/15)                            | [day15.zig](src/day15.zig) |
 | 16  | [The Floor Will Be Lava](https://adventofcode.com/2023/day/16)                  | [day16.zig](src/day16.zig) |
+| 17  | [Clumsy Crucible](https://adventofcode.com/2023/day/17)                         | [day17.zig](src/day17.zig) |
