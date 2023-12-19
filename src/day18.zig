@@ -198,6 +198,50 @@ fn deinitTreap(alloc: Allocator, root: anytype) void {
     }
     alloc.destroy(root);
 }
+
+fn part1Shape(shape: *Shape, y: *isize, x: *isize, last_dir: *u8, last_dist: *isize, dir: u8, dist: isize) !void {
+    switch (dir) {
+        'L' => {
+            if (last_dir.* == 'U') {
+                if (last_dist.* > 1)
+                    try shape.put(y.* + 1, x.*, last_dist.* - 1);
+            } else {
+                if (last_dist.* > 0)
+                    try shape.put(y.* + 1 - last_dist.*, x.*, last_dist.*);
+            }
+            x.* -= dist;
+        },
+        'R' => {
+            if (last_dir.* == 'U') {
+                if (last_dist.* > 0)
+                    try shape.put(y.*, x.*, last_dist.*);
+            } else {
+                if (last_dist.* > 1)
+                    try shape.put(y.* + 1 - last_dist.*, x.*, last_dist.* - 1);
+            }
+            x.* += dist;
+        },
+        'U' => {
+            y.* -= dist;
+            if (last_dir.* == 'R') {
+                last_dist.* = dist;
+            } else {
+                last_dist.* = dist + 1;
+            }
+        },
+        'D' => {
+            if (last_dir.* == 'R') {
+                last_dist.* = dist + 1;
+            } else {
+                last_dist.* = dist;
+            }
+            y.* += dist;
+        },
+        else => unreachable,
+    }
+    last_dir.* = dir;
+}
+
 fn part1(alloc: Allocator, input: []const u8) !isize {
     var i: usize = 0;
     var x: isize = 0;
@@ -228,94 +272,71 @@ fn part1(alloc: Allocator, input: []const u8) !isize {
         i += 2;
         const dist = readInt(isize, input, &i);
         nextLine(input, &i);
-
-        switch (dir) {
-            'L' => {
-                if (last_dir == 'U') {
-                    if (last_dist > 1)
-                        try shape.put(y + 1, x, last_dist - 1);
-                } else {
-                    if (last_dist > 0)
-                        try shape.put(y + 1 - last_dist, x, last_dist);
-                }
-                x -= dist;
-            },
-            'R' => {
-                if (last_dir == 'U') {
-                    if (last_dist > 0)
-                        try shape.put(y, x, last_dist);
-                } else {
-                    if (last_dist > 1)
-                        try shape.put(y + 1 - last_dist, x, last_dist - 1);
-                }
-                x += dist;
-            },
-            'U' => {
-                y -= dist;
-                if (last_dir == 'R') {
-                    last_dist = dist;
-                } else {
-                    last_dist = dist + 1;
-                }
-            },
-            'D' => {
-                if (last_dir == 'R') {
-                    last_dist = dist + 1;
-                } else {
-                    last_dist = dist;
-                }
-                y += dist;
-            },
-            else => unreachable,
-        }
-        last_dir = dir;
+        try part1Shape(
+            &shape,
+            &y,
+            &x,
+            &last_dir,
+            &last_dist,
+            dir,
+            dist,
+        );
     }
-    {
-        const dir = first_dir;
-        const dist = first_dist;
-
-        switch (dir) {
-            'L' => {
-                if (last_dir == 'U') {
-                    if (last_dist > 1)
-                        try shape.put(y + 1, x, last_dist - 1);
-                } else {
-                    if (last_dist > 0)
-                        try shape.put(y + 1 - last_dist, x, last_dist);
-                }
-                x -= dist;
-            },
-            'R' => {
-                if (last_dir == 'U') {
-                    if (last_dist > 0)
-                        try shape.put(y, x, last_dist);
-                } else {
-                    if (last_dist > 1)
-                        try shape.put(y + 1 - last_dist, x, last_dist - 1);
-                }
-                x += dist;
-            },
-            'U' => {
-                y -= dist;
-                if (last_dir == 'R') {
-                    last_dist = dist;
-                } else {
-                    last_dist = dist + 1;
-                }
-            },
-            'D' => {
-                if (last_dir == 'R') {
-                    last_dist = dist + 1;
-                } else {
-                    last_dist = dist;
-                }
-                y += dist;
-            },
-            else => unreachable,
-        }
-    }
+    try part1Shape(
+        &shape,
+        &y,
+        &x,
+        &last_dir,
+        &last_dist,
+        first_dir,
+        first_dist,
+    );
     return try shape.area();
 }
+
+fn part2Shape(shape: *Shape, y: *isize, x: *isize, last_dir: *u8, last_dist: *isize, dir: u8, dist: isize) !void {
+    switch (dir) {
+        2 => {
+            if (last_dir.* == 3) {
+                if (last_dist.* > 1)
+                    try shape.put(y.* + 1, x.*, last_dist.* - 1);
+            } else {
+                if (last_dist.* > 0)
+                    try shape.put(y.* + 1 - last_dist.*, x.*, last_dist.*);
+            }
+            x.* -= dist;
+        },
+        0 => {
+            if (last_dir.* == 3) {
+                if (last_dist.* > 0)
+                    try shape.put(y.*, x.*, last_dist.*);
+            } else {
+                if (last_dist.* > 1)
+                    try shape.put(y.* + 1 - last_dist.*, x.*, last_dist.* - 1);
+            }
+            x.* += dist;
+        },
+        3 => {
+            y.* -= dist;
+            if (last_dir.* == 0) {
+                last_dist.* = dist;
+            } else {
+                last_dist.* = dist + 1;
+            }
+        },
+        1 => {
+            if (last_dir.* == 0) {
+                last_dist.* = dist + 1;
+            } else {
+                last_dist.* = dist;
+            }
+            y.* += dist;
+        },
+        else => unreachable,
+    }
+    last_dir.* = dir;
+}
+
 fn part2(alloc: Allocator, input: []const u8) !isize {
     var i: usize = 0;
     var x: isize = 0;
@@ -350,91 +371,26 @@ fn part2(alloc: Allocator, input: []const u8) !isize {
         const dist = readHex(isize, input, &i);
         var dir = input[i] - '0';
         nextLine(input, &i);
-
-        switch (dir) {
-            2 => {
-                if (last_dir == 3) {
-                    if (last_dist > 1)
-                        try shape.put(y + 1, x, last_dist - 1);
-                } else {
-                    if (last_dist > 0)
-                        try shape.put(y + 1 - last_dist, x, last_dist);
-                }
-                x -= dist;
-            },
-            0 => {
-                if (last_dir == 3) {
-                    if (last_dist > 0)
-                        try shape.put(y, x, last_dist);
-                } else {
-                    if (last_dist > 1)
-                        try shape.put(y + 1 - last_dist, x, last_dist - 1);
-                }
-                x += dist;
-            },
-            3 => {
-                y -= dist;
-                if (last_dir == 0) {
-                    last_dist = dist;
-                } else {
-                    last_dist = dist + 1;
-                }
-            },
-            1 => {
-                if (last_dir == 0) {
-                    last_dist = dist + 1;
-                } else {
-                    last_dist = dist;
-                }
-                y += dist;
-            },
-            else => unreachable,
-        }
-        last_dir = dir;
+        try part2Shape(
+            &shape,
+            &y,
+            &x,
+            &last_dir,
+            &last_dist,
+            dir,
+            dist,
+        );
     }
     {
-        const dir = first_dir;
-        const dist = first_dist;
-
-        switch (dir) {
-            2 => {
-                if (last_dir == 3) {
-                    if (last_dist > 1)
-                        try shape.put(y + 1, x, last_dist - 1);
-                } else {
-                    if (last_dist > 0)
-                        try shape.put(y + 1 - last_dist, x, last_dist);
-                }
-                x -= dist;
-            },
-            0 => {
-                if (last_dir == 3) {
-                    if (last_dist > 0)
-                        try shape.put(y, x, last_dist);
-                } else {
-                    if (last_dist > 1)
-                        try shape.put(y + 1 - last_dist, x, last_dist - 1);
-                }
-                x += dist;
-            },
-            3 => {
-                y -= dist;
-                if (last_dir == 0) {
-                    last_dist = dist;
-                } else {
-                    last_dist = dist + 1;
-                }
-            },
-            1 => {
-                if (last_dir == 0) {
-                    last_dist = dist + 1;
-                } else {
-                    last_dist = dist;
-                }
-                y += dist;
-            },
-            else => unreachable,
-        }
+        try part2Shape(
+            &shape,
+            &y,
+            &x,
+            &last_dir,
+            &last_dist,
+            first_dir,
+            first_dist,
+        );
     }
     return try shape.area();
 }
