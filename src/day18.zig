@@ -391,17 +391,15 @@ fn part2(alloc: Allocator, input: []const u8) !isize {
             dist,
         );
     }
-    {
-        try part2Shape(
-            &shape,
-            &y,
-            &x,
-            &last_dir,
-            &last_dist,
-            first_dir,
-            first_dist,
-        );
-    }
+    try part2Shape(
+        &shape,
+        &y,
+        &x,
+        &last_dir,
+        &last_dist,
+        first_dir,
+        first_dist,
+    );
     return try shape.area();
 }
 
