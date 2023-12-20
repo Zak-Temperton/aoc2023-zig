@@ -120,6 +120,30 @@ const Shape = struct {
         return l[0] < r[0];
     }
 
+    fn removeZeros(list: *std.ArrayList([2]isize)) void {
+        var i: usize = 0;
+        while (i < list.items.len) {
+            if (list.items[i][1] == 0) {
+                _ = list.orderedRemove(i);
+            } else {
+                i += 1;
+            }
+        }
+    }
+
+    fn insert(list: *std.ArrayList([2]isize), s: usize, new: [2]isize) !usize {
+        if (s < list.items.len) {
+            for (list.items[s..], s..) |item, i| {
+                if (item[0] > new[0]) {
+                    try list.insert(i, new);
+                    return i + 1;
+                }
+            }
+        }
+        try list.append(new);
+        return list.items.len;
+    }
+
     fn area(self: *Shape) !isize {
         var sum: isize = 0;
         var iter = self.rows.inorderIterator();
@@ -149,30 +173,16 @@ const Shape = struct {
 
                 diff -= min;
 
-                var new_list = try std.ArrayList([2]isize).initCapacity(self.allocator, curr.items.len);
-                for (curr.items) |item| {
-                    if (item[1] > 0) new_list.appendAssumeCapacity(item);
-                }
-                curr.deinit();
-                curr = new_list;
-
-                std.mem.sortUnstable([2]isize, curr.items, {}, asc);
+                removeZeros(&curr);
                 min = try minHeight(&curr, diff);
             }
 
-            var new_list = try std.ArrayList([2]isize).initCapacity(self.allocator, curr.items.len);
-            for (curr.items) |item| {
-                if (item[1] > 0) new_list.appendAssumeCapacity(item);
-            }
-            curr.deinit();
-            curr = new_list;
-
             var row = self.map.getPtr(next.key).?;
             var row_iter = row.treap.inorderIterator();
+            var i: usize = 0;
             while (row_iter.next()) |col| {
-                try curr.append(col.key);
+                i = try insert(&curr, i, col.key);
             }
-            std.mem.sortUnstable([2]isize, curr.items, {}, asc);
         }
 
         var i: usize = 0;
