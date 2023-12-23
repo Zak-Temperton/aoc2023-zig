@@ -340,7 +340,7 @@ fn numAcceptedRules(rules: std.StringHashMap([]const Rule), checks: []const Rule
     var result: u64 = 0;
     for (checks, 0..) |check, i| {
         switch (check) {
-            .x_lt => |ch| if (lower[0] <= ch.val and ch.val <= upper[0]) {
+            .x_lt => |ch| {
                 switch (ch.goto) {
                     .accept => {
                         result += (ch.val - lower[0]) * (upper[1] - lower[1] + 1) * (upper[2] - lower[2] + 1) * (upper[3] - lower[3] + 1);
@@ -357,7 +357,7 @@ fn numAcceptedRules(rules: std.StringHashMap([]const Rule), checks: []const Rule
                 }
                 lower[0] = ch.val;
             },
-            .x_gt => |ch| if (lower[0] <= ch.val and ch.val <= upper[0]) {
+            .x_gt => |ch| {
                 switch (ch.goto) {
                     .accept => {
                         result += (upper[0] - ch.val) * (upper[1] - lower[1] + 1) * (upper[2] - lower[2] + 1) * (upper[3] - lower[3] + 1);
@@ -374,7 +374,7 @@ fn numAcceptedRules(rules: std.StringHashMap([]const Rule), checks: []const Rule
                 }
                 upper[0] = ch.val;
             },
-            .x_eq => |ch| if (lower[0] <= ch.val and ch.val <= upper[0]) {
+            .x_eq => |ch| {
                 var tmp1 = lower[0];
                 var tmp2 = upper[0];
                 switch (ch.goto) {
@@ -401,7 +401,7 @@ fn numAcceptedRules(rules: std.StringHashMap([]const Rule), checks: []const Rule
                 break;
             },
 
-            .m_lt => |ch| if (lower[1] <= ch.val and ch.val <= upper[1]) {
+            .m_lt => |ch| {
                 switch (ch.goto) {
                     .accept => {
                         result += (upper[0] - lower[0] + 1) * (ch.val - lower[1]) * (upper[2] - lower[2] + 1) * (upper[3] - lower[3] + 1);
@@ -418,7 +418,7 @@ fn numAcceptedRules(rules: std.StringHashMap([]const Rule), checks: []const Rule
                 }
                 lower[1] = ch.val;
             },
-            .m_gt => |ch| if (lower[1] <= ch.val and ch.val <= upper[1]) {
+            .m_gt => |ch| {
                 switch (ch.goto) {
                     .accept => {
                         result += (upper[0] - lower[0] + 1) * (upper[1] - ch.val) * (upper[2] - lower[2] + 1) * (upper[3] - lower[3] + 1);
@@ -435,7 +435,7 @@ fn numAcceptedRules(rules: std.StringHashMap([]const Rule), checks: []const Rule
                 }
                 upper[1] = ch.val;
             },
-            .m_eq => |ch| if (lower[1] <= ch.val and ch.val <= upper[1]) {
+            .m_eq => |ch| {
                 var tmp1 = lower[1];
                 var tmp2 = upper[1];
                 switch (ch.goto) {
@@ -462,7 +462,7 @@ fn numAcceptedRules(rules: std.StringHashMap([]const Rule), checks: []const Rule
                 break;
             },
 
-            .a_lt => |ch| if (lower[2] <= ch.val and ch.val <= upper[2]) {
+            .a_lt => |ch| {
                 switch (ch.goto) {
                     .accept => {
                         result += (upper[0] - lower[0] + 1) * (upper[1] - lower[1] + 1) * (ch.val - lower[2]) * (upper[3] - lower[3] + 1);
@@ -479,7 +479,7 @@ fn numAcceptedRules(rules: std.StringHashMap([]const Rule), checks: []const Rule
                 }
                 lower[2] = ch.val;
             },
-            .a_gt => |ch| if (lower[2] <= ch.val and ch.val <= upper[2]) {
+            .a_gt => |ch| {
                 switch (ch.goto) {
                     .accept => {
                         result += (upper[0] - lower[0] + 1) * (upper[1] - lower[1] + 1) * (upper[2] - ch.val) * (upper[3] - lower[3] + 1);
@@ -496,7 +496,7 @@ fn numAcceptedRules(rules: std.StringHashMap([]const Rule), checks: []const Rule
                 }
                 upper[2] = ch.val;
             },
-            .a_eq => |ch| if (lower[2] <= ch.val and ch.val <= upper[2]) {
+            .a_eq => |ch| {
                 var tmp1 = lower[2];
                 var tmp2 = upper[2];
                 switch (ch.goto) {
@@ -523,7 +523,7 @@ fn numAcceptedRules(rules: std.StringHashMap([]const Rule), checks: []const Rule
                 break;
             },
 
-            .s_lt => |ch| if (lower[3] <= ch.val and ch.val <= upper[3]) {
+            .s_lt => |ch| {
                 switch (ch.goto) {
                     .accept => {
                         result += (upper[0] - lower[0] + 1) * (upper[1] - lower[1] + 1) * (upper[2] - lower[2] + 1) * (ch.val - lower[3]);
@@ -540,7 +540,7 @@ fn numAcceptedRules(rules: std.StringHashMap([]const Rule), checks: []const Rule
                 }
                 lower[3] = ch.val;
             },
-            .s_gt => |ch| if (lower[3] <= ch.val and ch.val <= upper[3]) {
+            .s_gt => |ch| {
                 switch (ch.goto) {
                     .accept => {
                         result += (upper[0] - lower[0] + 1) * (upper[1] - lower[1] + 1) * (upper[2] - lower[2] + 1) * (upper[3] - ch.val);
@@ -557,7 +557,7 @@ fn numAcceptedRules(rules: std.StringHashMap([]const Rule), checks: []const Rule
                 }
                 upper[3] = ch.val;
             },
-            .s_eq => |ch| if (lower[3] <= ch.val and ch.val <= upper[3]) {
+            .s_eq => |ch| {
                 var tmp1 = lower[3];
                 var tmp2 = upper[3];
                 switch (ch.goto) {
