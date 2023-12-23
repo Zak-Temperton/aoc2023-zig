@@ -22,3 +22,4 @@ My solutions to Advent of Code 2023 in Zig
 | 16  | [The Floor Will Be Lava](https://adventofcode.com/2023/day/16)                  | [day16.zig](src/day16.zig) |
 | 17  | [Clumsy Crucible](https://adventofcode.com/2023/day/17)                         | [day17.zig](src/day17.zig) |
 | 18  | [Lavaduct Lagoon](https://adventofcode.com/2023/day/18)                         | [day18.zig](src/day18.zig) |
+| 19  | [Aplenty](https://adventofcode.com/2023/day/19)                                 | [day19.zig](src/day19.zig) |
