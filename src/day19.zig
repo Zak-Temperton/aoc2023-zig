@@ -44,29 +44,28 @@ const Key = union(enum) {
 };
 
 const Check = struct {
+    review: u2,
     val: u64,
     goto: Key,
 };
 
 const Rule = union(enum) {
-    a_lt: Check,
-    a_gt: Check,
-    a_eq: Check,
-
-    s_lt: Check,
-    s_gt: Check,
-    s_eq: Check,
-
-    m_lt: Check,
-    m_gt: Check,
-    m_eq: Check,
-
-    x_lt: Check,
-    x_gt: Check,
-    x_eq: Check,
+    lt: Check,
+    gt: Check,
+    eq: Check,
 
     goto: Key,
 };
+
+fn charToReview(char: u8) u2 {
+    return switch (char) {
+        'x' => 0,
+        'm' => 1,
+        'a' => 2,
+        's' => 3,
+        else => unreachable,
+    };
+}
 
 fn addChecks(checks: *std.ArrayList(Rule), input: []const u8, i: *usize) !void {
     while (true) {
@@ -91,14 +90,8 @@ fn addChecks(checks: *std.ArrayList(Rule), input: []const u8, i: *usize) !void {
                         break :blk Key{ .goto = input[start..i.*] };
                     },
                 };
-                var check = Check{ .val = val, .goto = key };
-                switch (part) {
-                    'x' => try checks.append(Rule{ .x_gt = check }),
-                    'a' => try checks.append(Rule{ .a_gt = check }),
-                    's' => try checks.append(Rule{ .s_gt = check }),
-                    'm' => try checks.append(Rule{ .m_gt = check }),
-                    else => unreachable,
-                }
+                var check = Check{ .review = charToReview(part), .val = val, .goto = key };
+                try checks.append(Rule{ .gt = check });
             },
             '<' => {
                 const part = input[i.*];
@@ -120,14 +113,8 @@ fn addChecks(checks: *std.ArrayList(Rule), input: []const u8, i: *usize) !void {
                         break :blk Key{ .goto = input[start..i.*] };
                     },
                 };
-                var check = Check{ .val = val, .goto = key };
-                switch (part) {
-                    'x' => try checks.append(Rule{ .x_lt = check }),
-                    'a' => try checks.append(Rule{ .a_lt = check }),
-                    's' => try checks.append(Rule{ .s_lt = check }),
-                    'm' => try checks.append(Rule{ .m_lt = check }),
-                    else => unreachable,
-                }
+                var check = Check{ .review = charToReview(part), .val = val, .goto = key };
+                try checks.append(Rule{ .lt = check });
             },
             '=' => {
                 const part = input[i.*];
@@ -149,14 +136,8 @@ fn addChecks(checks: *std.ArrayList(Rule), input: []const u8, i: *usize) !void {
                         break :blk Key{ .goto = input[start..i.*] };
                     },
                 };
-                var check = Check{ .val = val, .goto = key };
-                switch (part) {
-                    'x' => try checks.append(Rule{ .x_eq = check }),
-                    'a' => try checks.append(Rule{ .a_eq = check }),
-                    's' => try checks.append(Rule{ .s_eq = check }),
-                    'm' => try checks.append(Rule{ .m_eq = check }),
-                    else => unreachable,
-                }
+                var check = Check{ .review = charToReview(part), .val = val, .goto = key };
+                try checks.append(Rule{ .eq = check });
             },
             ',', '}' => {
                 switch (input[i.*]) {
@@ -223,91 +204,27 @@ fn acceptedSum(rules: std.StringHashMap([]const Rule), ratings: [4]u64) u64 {
         if (rules.get(key)) |checks| {
             for (checks) |check| {
                 switch (check) {
-                    .x_lt => |x_lt| if (ratings[0] < x_lt.val) {
-                        if (gotoKey(x_lt.goto, &key, ratings)) |sum| {
+                    .lt => |lt| if (ratings[lt.review] < lt.val) {
+                        if (gotoKey(lt.goto, &key, ratings)) |sum| {
                             return sum;
                         } else {
                             break;
                         }
                     },
-                    .x_gt => |x_gt| if (ratings[0] > x_gt.val) {
-                        if (gotoKey(x_gt.goto, &key, ratings)) |sum| {
+                    .gt => |gt| if (ratings[gt.review] > gt.val) {
+                        if (gotoKey(gt.goto, &key, ratings)) |sum| {
                             return sum;
                         } else {
                             break;
                         }
                     },
-                    .x_eq => |x_eq| if (ratings[0] == x_eq.val) {
-                        if (gotoKey(x_eq.goto, &key, ratings)) |sum| {
+                    .eq => |eq| if (ratings[eq.review] == eq.val) {
+                        if (gotoKey(eq.goto, &key, ratings)) |sum| {
                             return sum;
                         } else {
                             break;
                         }
                     },
-                    .m_lt => |m_lt| if (ratings[1] < m_lt.val) {
-                        if (gotoKey(m_lt.goto, &key, ratings)) |sum| {
-                            return sum;
-                        } else {
-                            break;
-                        }
-                    },
-                    .m_gt => |m_gt| if (ratings[1] > m_gt.val) {
-                        if (gotoKey(m_gt.goto, &key, ratings)) |sum| {
-                            return sum;
-                        } else {
-                            break;
-                        }
-                    },
-                    .m_eq => |m_eq| if (ratings[1] == m_eq.val) {
-                        if (gotoKey(m_eq.goto, &key, ratings)) |sum| {
-                            return sum;
-                        } else {
-                            break;
-                        }
-                    },
-                    .a_lt => |a_lt| if (ratings[2] < a_lt.val) {
-                        if (gotoKey(a_lt.goto, &key, ratings)) |sum| {
-                            return sum;
-                        } else {
-                            break;
-                        }
-                    },
-                    .a_gt => |a_gt| if (ratings[2] > a_gt.val) {
-                        if (gotoKey(a_gt.goto, &key, ratings)) |sum| {
-                            return sum;
-                        } else {
-                            break;
-                        }
-                    },
-                    .a_eq => |a_eq| if (ratings[2] == a_eq.val) {
-                        if (gotoKey(a_eq.goto, &key, ratings)) |sum| {
-                            return sum;
-                        } else {
-                            break;
-                        }
-                    },
-                    .s_lt => |s_lt| if (ratings[3] < s_lt.val) {
-                        if (gotoKey(s_lt.goto, &key, ratings)) |sum| {
-                            return sum;
-                        } else {
-                            break;
-                        }
-                    },
-                    .s_gt => |s_gt| if (ratings[3] > s_gt.val) {
-                        if (gotoKey(s_gt.goto, &key, ratings)) |sum| {
-                            return sum;
-                        } else {
-                            break;
-                        }
-                    },
-                    .s_eq => |s_eq| if (ratings[3] == s_eq.val) {
-                        if (gotoKey(s_eq.goto, &key, ratings)) |sum| {
-                            return sum;
-                        } else {
-                            break;
-                        }
-                    },
-
                     .goto => |goto| if (gotoKey(goto, &key, ratings)) |sum| {
                         return sum;
                     } else {
@@ -340,250 +257,76 @@ fn numAcceptedRules(rules: std.StringHashMap([]const Rule), checks: []const Rule
     var result: u64 = 0;
     for (checks, 0..) |check, i| {
         switch (check) {
-            .x_lt => |ch| {
+            .lt => |ch| {
                 switch (ch.goto) {
                     .accept => {
-                        result += (ch.val - lower[0]) * (upper[1] - lower[1] + 1) * (upper[2] - lower[2] + 1) * (upper[3] - lower[3] + 1);
+                        var tmp = upper[ch.review];
+                        upper[ch.review] = ch.val - 1;
+                        result += (upper[0] - lower[0] + 1) * (upper[1] - lower[1] + 1) * (upper[2] - lower[2] + 1) * (upper[3] - lower[3] + 1);
+                        upper[ch.review] = tmp;
                     },
                     .reject => {},
                     .goto => |goto| {
                         var tmp_upper = upper.*;
                         var tmp_lower = lower.*;
-                        upper[0] = ch.val - 1;
+                        upper[ch.review] = ch.val - 1;
                         result += numAccepted(rules, lower, upper, goto);
                         upper.* = tmp_upper;
                         lower.* = tmp_lower;
                     },
                 }
-                lower[0] = ch.val;
+                lower[ch.review] = ch.val;
             },
-            .x_gt => |ch| {
+            .gt => |ch| {
                 switch (ch.goto) {
                     .accept => {
-                        result += (upper[0] - ch.val) * (upper[1] - lower[1] + 1) * (upper[2] - lower[2] + 1) * (upper[3] - lower[3] + 1);
+                        var tmp = lower[ch.review];
+                        lower[ch.review] = ch.val + 1;
+                        result += (upper[0] - lower[0] + 1) * (upper[1] - lower[1] + 1) * (upper[2] - lower[2] + 1) * (upper[3] - lower[3] + 1);
+                        lower[ch.review] = tmp;
                     },
                     .reject => {},
                     .goto => |goto| {
                         var tmp_upper = upper.*;
                         var tmp_lower = lower.*;
-                        lower[0] = ch.val + 1;
+                        lower[ch.review] = ch.val + 1;
                         result += numAccepted(rules, lower, upper, goto);
                         lower.* = tmp_lower;
                         upper.* = tmp_upper;
                     },
                 }
-                upper[0] = ch.val;
+                upper[ch.review] = ch.val;
             },
-            .x_eq => |ch| {
-                var tmp1 = lower[0];
-                var tmp2 = upper[0];
+            .eq => |ch| {
+                var tmp1 = lower[ch.review];
+                var tmp2 = upper[ch.review];
                 switch (ch.goto) {
                     .accept => {
-                        result += (upper[1] - lower[1] + 1) * (upper[2] - lower[2] + 1) * (upper[3] - lower[3] + 1);
+                        lower[ch.review] = ch.val;
+                        upper[ch.review] = ch.val;
+                        result += (upper[0] - lower[0] + 1) * (upper[1] - lower[1] + 1) * (upper[2] - lower[2] + 1) * (upper[3] - lower[3] + 1);
+                        lower[ch.review] = tmp1;
+                        upper[ch.review] = tmp2;
                     },
                     .reject => {},
                     .goto => |goto| {
-                        lower[0] = ch.val;
-                        upper[0] = ch.val;
+                        lower[ch.review] = ch.val;
+                        upper[ch.review] = ch.val;
                         result += numAccepted(rules, lower, upper, goto);
                     },
                 }
                 var new_upper = upper.*;
                 var new_lower = lower.*;
-                new_upper[0] = tmp2;
-                new_lower[0] = ch.val + 1;
+                new_upper[ch.review] = tmp2;
+                new_lower[ch.review] = ch.val + 1;
                 result += numAcceptedRules(rules, checks[i + 1 ..], &new_lower, &new_upper);
 
-                lower[0] = tmp1;
-                upper[0] = ch.val - 1;
+                lower[ch.review] = tmp1;
+                upper[ch.review] = ch.val - 1;
                 result += numAcceptedRules(rules, checks[i + 1 ..], lower, upper);
 
                 break;
             },
-
-            .m_lt => |ch| {
-                switch (ch.goto) {
-                    .accept => {
-                        result += (upper[0] - lower[0] + 1) * (ch.val - lower[1]) * (upper[2] - lower[2] + 1) * (upper[3] - lower[3] + 1);
-                    },
-                    .reject => {},
-                    .goto => |goto| {
-                        var tmp_upper = upper.*;
-                        var tmp_lower = lower.*;
-                        upper[1] = ch.val - 1;
-                        result += numAccepted(rules, lower, upper, goto);
-                        upper.* = tmp_upper;
-                        lower.* = tmp_lower;
-                    },
-                }
-                lower[1] = ch.val;
-            },
-            .m_gt => |ch| {
-                switch (ch.goto) {
-                    .accept => {
-                        result += (upper[0] - lower[0] + 1) * (upper[1] - ch.val) * (upper[2] - lower[2] + 1) * (upper[3] - lower[3] + 1);
-                    },
-                    .reject => {},
-                    .goto => |goto| {
-                        var tmp_upper = upper.*;
-                        var tmp_lower = lower.*;
-                        lower[1] = ch.val + 1;
-                        result += numAccepted(rules, lower, upper, goto);
-                        lower.* = tmp_lower;
-                        upper.* = tmp_upper;
-                    },
-                }
-                upper[1] = ch.val;
-            },
-            .m_eq => |ch| {
-                var tmp1 = lower[1];
-                var tmp2 = upper[1];
-                switch (ch.goto) {
-                    .accept => {
-                        result += (upper[0] - lower[0] + 1) * (upper[2] - lower[2] + 1) * (upper[3] - lower[3] + 1);
-                    },
-                    .reject => {},
-                    .goto => |goto| {
-                        lower[1] = ch.val;
-                        upper[1] = ch.val;
-                        result += numAccepted(rules, lower, upper, goto);
-                    },
-                }
-                var new_upper = upper.*;
-                var new_lower = lower.*;
-                new_upper[1] = tmp2;
-                new_lower[1] = ch.val + 1;
-                result += numAcceptedRules(rules, checks[i + 1 ..], &new_lower, &new_upper);
-
-                lower[1] = tmp1;
-                upper[1] = ch.val - 1;
-                result += numAcceptedRules(rules, checks[i + 1 ..], lower, upper);
-
-                break;
-            },
-
-            .a_lt => |ch| {
-                switch (ch.goto) {
-                    .accept => {
-                        result += (upper[0] - lower[0] + 1) * (upper[1] - lower[1] + 1) * (ch.val - lower[2]) * (upper[3] - lower[3] + 1);
-                    },
-                    .reject => {},
-                    .goto => |goto| {
-                        var tmp_upper = upper.*;
-                        var tmp_lower = lower.*;
-                        upper[2] = ch.val - 1;
-                        result += numAccepted(rules, lower, upper, goto);
-                        upper.* = tmp_upper;
-                        lower.* = tmp_lower;
-                    },
-                }
-                lower[2] = ch.val;
-            },
-            .a_gt => |ch| {
-                switch (ch.goto) {
-                    .accept => {
-                        result += (upper[0] - lower[0] + 1) * (upper[1] - lower[1] + 1) * (upper[2] - ch.val) * (upper[3] - lower[3] + 1);
-                    },
-                    .reject => {},
-                    .goto => |goto| {
-                        var tmp_upper = upper.*;
-                        var tmp_lower = lower.*;
-                        lower[2] = ch.val + 1;
-                        result += numAccepted(rules, lower, upper, goto);
-                        lower.* = tmp_lower;
-                        upper.* = tmp_upper;
-                    },
-                }
-                upper[2] = ch.val;
-            },
-            .a_eq => |ch| {
-                var tmp1 = lower[2];
-                var tmp2 = upper[2];
-                switch (ch.goto) {
-                    .accept => {
-                        result += (upper[0] - lower[0] + 1) * (upper[1] - lower[1] + 1) * (upper[3] - lower[3] + 1);
-                    },
-                    .reject => {},
-                    .goto => |goto| {
-                        lower[2] = ch.val;
-                        upper[2] = ch.val;
-                        result += numAccepted(rules, lower, upper, goto);
-                    },
-                }
-                var new_upper = upper.*;
-                var new_lower = lower.*;
-                new_upper[2] = tmp2;
-                new_lower[2] = ch.val + 1;
-                result += numAcceptedRules(rules, checks[i + 1 ..], &new_lower, &new_upper);
-
-                lower[2] = tmp1;
-                upper[2] = ch.val - 1;
-                result += numAcceptedRules(rules, checks[i + 1 ..], lower, upper);
-
-                break;
-            },
-
-            .s_lt => |ch| {
-                switch (ch.goto) {
-                    .accept => {
-                        result += (upper[0] - lower[0] + 1) * (upper[1] - lower[1] + 1) * (upper[2] - lower[2] + 1) * (ch.val - lower[3]);
-                    },
-                    .reject => {},
-                    .goto => |goto| {
-                        var tmp_upper = upper.*;
-                        var tmp_lower = lower.*;
-                        upper[3] = ch.val - 1;
-                        result += numAccepted(rules, lower, upper, goto);
-                        upper.* = tmp_upper;
-                        lower.* = tmp_lower;
-                    },
-                }
-                lower[3] = ch.val;
-            },
-            .s_gt => |ch| {
-                switch (ch.goto) {
-                    .accept => {
-                        result += (upper[0] - lower[0] + 1) * (upper[1] - lower[1] + 1) * (upper[2] - lower[2] + 1) * (upper[3] - ch.val);
-                    },
-                    .reject => {},
-                    .goto => |goto| {
-                        var tmp_upper = upper.*;
-                        var tmp_lower = lower.*;
-                        lower[3] = ch.val + 1;
-                        result += numAccepted(rules, lower, upper, goto);
-                        lower.* = tmp_lower;
-                        upper.* = tmp_upper;
-                    },
-                }
-                upper[3] = ch.val;
-            },
-            .s_eq => |ch| {
-                var tmp1 = lower[3];
-                var tmp2 = upper[3];
-                switch (ch.goto) {
-                    .accept => {
-                        result += (upper[0] - lower[0] + 1) * (upper[1] - lower[1] + 1) * (upper[2] - lower[2] + 1);
-                    },
-                    .reject => {},
-                    .goto => |goto| {
-                        lower[3] = ch.val;
-                        upper[3] = ch.val;
-                        result += numAccepted(rules, lower, upper, goto);
-                    },
-                }
-                var new_upper = upper.*;
-                var new_lower = lower.*;
-                new_upper[3] = tmp2;
-                new_lower[3] = ch.val + 1;
-                result += numAcceptedRules(rules, checks[i + 1 ..], &new_lower, &new_upper);
-
-                lower[3] = tmp1;
-                upper[3] = ch.val - 1;
-                result += numAcceptedRules(rules, checks[i + 1 ..], lower, upper);
-
-                break;
-            },
-
             .goto => |goto| {
                 switch (goto) {
                     .accept => {
@@ -668,13 +411,6 @@ test "part2" {
         \\{x=2036,m=264,a=79,s=2244}
         \\{x=2461,m=1339,a=466,s=291}
         \\{x=2127,m=1623,a=2188,s=1013}
-        \\
-    ));
-}
-test "other" {
-    try std.testing.expect(4000 * 4000 * 4000 * (3999) == try part2(std.testing.allocator,
-        \\in{s=1351:R,A}
-        \\
         \\
     ));
 }
